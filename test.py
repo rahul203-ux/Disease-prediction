@@ -1,26 +1,28 @@
+# app.py
 import streamlit as st
-import disease   # import the ML/NLP logic
+from disease import diagnose_any_symptom  # your existing code
 
+st.set_page_config(page_title="AI Medical Diagnosis", layout="centered")
 st.title("🧠 AI Medical Diagnosis Assistant")
 
+# User inputs
 age = st.number_input("Age", min_value=1, max_value=120, value=30)
 gender = st.selectbox("Gender", ["male", "female"])
-severity = st.slider("Severity Level (1–5)", 1, 5)
-symptoms = st.text_area("Describe your symptoms")
+severity = st.slider("Severity (1–5)", 1, 5)
+symptoms = st.text_area("Describe your symptoms here")
 
 if st.button("Analyze"):
-    if symptoms.strip() == "":
-        st.warning("Please enter symptoms")
+    if not symptoms.strip():
+        st.warning("Please enter your symptoms!")
     else:
-        results = disease.diagnose_any_symptom(symptoms, age, gender, severity)
-        most_probable = results[0]
+        results = diagnose_any_symptom(symptoms, age=age, gender=gender, severity=severity)
 
         st.subheader("🧠 AI Diagnosis Result")
-        st.write("Most Probable Disease:", most_probable[0])
-        st.write(f"Confidence Level: {most_probable[1]*100:.2f}%")
+        st.write("**Most Probable Disease:**", results[0][0])
+        st.write(f"**Confidence Level:** {results[0][1]*100:.2f}%")
 
-        st.write("\nTop Possible Diseases:")
-        for d, s in results[:3]:
-            st.write("-", d)
-        
-        st.info("⚠️ This system is for decision support. Consult a doctor for confirmation.")
+        st.write("**Top Possible Diseases:**")
+        for disease, score in results[:5]:
+            st.write("-", disease)
+
+        st.info("⚠️ This system assists diagnosis. Consult a doctor for confirmation.")
